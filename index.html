@@ -96,6 +96,11 @@
       const messageWrapper = document.getElementById("message-wrapper");
       const messageContainer = document.querySelector(".message-container");
 
+      const scrollbar = () => {
+        const container = messageWrapper.parentElement;
+        container.scrollTop = container.scrollHeight;
+      };
+
       form.addEventListener("submit", (e) => {
         e.preventDefault();
 
@@ -116,6 +121,7 @@
               `;
 
         messageWrapper.appendChild(newDiv);
+        scrollbar();
         if (inputTextValue) {
           socket.emit("send_message", {
             message: inputTextValue,
@@ -137,14 +143,7 @@
                   </div>
               `;
         messageWrapper.appendChild(cteateNewDiv);
-        // window.scrollTo(0, document.body.scrollHeight);
-
-        // messageContainer.scrollTop = messageContainer.scrollHeight;
-        const container = messageWrapper.parentElement;
-        setTimeout(() => {
-          container.scrollTop = container.scrollHeight;
-        }, 10);
-        
+        scrollbar();
       });
     </script>
   </body>
