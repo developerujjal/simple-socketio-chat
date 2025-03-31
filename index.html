@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .message-container {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e0 #f7fafc;
+      }
+      .message-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      .message-container::-webkit-scrollbar-track {
+        background: #f7fafc;
+      }
+      .message-container::-webkit-scrollbar-thumb {
+        background-color: #cbd5e0;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 h-screen flex items-center justify-center p-4">
+    <div
+      class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden"
+      style="height: 90vh"
+    >
+      <!-- Messages Display Area -->
+      <div
+        class="message-container h-[calc(100%-72px)] p-4 overflow-y-auto bg-gray-50"
+      >
+        <div id="message-wrapper" class="space-y-3">
+          <!-- Sent Message -->
+          <!-- <div class="flex justify-end">
+            <div
+              class="bg-blue-500 text-white p-3 rounded-lg rounded-tr-none shadow-sm max-w-[80%]"
+            >
+              <p>Going well! Just finished the main components.</p>
+              <p class="text-xs text-blue-100 mt-1">10:32 AM</p>
+            </div>
+          </div> -->
+
+          <!-- Received Message -->
+          <!-- <div class="flex items-start">
+            <div
+              class="bg-white p-3 rounded-lg rounded-tl-none shadow-sm max-w-[80%]"
+            >
+              <p class="text-gray-800">Hey there! How's the project going?</p>
+              <p class="text-xs text-gray-500 mt-1">10:30 AM</p>
+            </div>
+          </div> -->
+
+          <!-- System Message (Typing Indicator) -->
+          <!-- <div class="text-center py-2">
+                    <div class="inline-flex space-x-1 bg-gray-100 px-3 py-1 rounded-full">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+                    </div>
+                </div> -->
+        </div>
+      </div>
+
+      <!-- Message Input Area -->
+      <div class="p-3 border-t border-gray-200 bg-white">
+        <form id="form" class="flex items-center space-x-2">
+          <button type="button" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-paperclip"></i>
+          </button>
+          <input
+            id="text"
+            type="text"
+            placeholder="Type your message..."
+            class="flex-1 py-2 px-4 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+          >
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const form = document.getElementById("form");
+      const messageWrapper = document.getElementById("message-wrapper");
+      const messageContainer = document.querySelector(".message-container");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const inputText = document.getElementById("text");
+
+        const inputTextValue = inputText.value;
+
+        const newDiv = document.createElement("div");
+        newDiv.classList.add("flex", "justify-start");
+        const currentTime = new Date().toLocaleTimeString();
+        newDiv.innerHTML = `
+                  <div
+                    class="bg-blue-500 text-white p-3 rounded-lg rounded-tr-none shadow-sm max-w-[80%]"
+                  >
+                    <p>${inputTextValue}</p>
+                    <p class="text-xs text-blue-100 mt-1">${currentTime}</p>
+                  </div>
+              `;
+
+        messageWrapper.appendChild(newDiv);
+        if (inputTextValue) {
+          socket.emit("send_message", {
+            message: inputTextValue,
+            time: currentTime,
+          });
+          inputText.value = "";
+        }
+      });
+
+      socket.on("recieved_message", (data) => {
+        const cteateNewDiv = document.createElement("div");
+        cteateNewDiv.classList.add("flex", "justify-end");
+        cteateNewDiv.innerHTML = `
+                  <div
+                    class="bg-white p-3 rounded-lg rounded-tl-none shadow-sm max-w-[80%]"
+                  >
+                    <p class="text-gray-800">${data.message}</p>
+                    <p class="text-xs text-gray-500 mt-1">${data.time}</p>
+                  </div>
+              `;
+        messageWrapper.appendChild(cteateNewDiv);
+        // window.scrollTo(0, document.body.scrollHeight);
+
+        // messageContainer.scrollTop = messageContainer.scrollHeight;
+        const container = messageWrapper.parentElement;
+        setTimeout(() => {
+          container.scrollTop = container.scrollHeight;
+        }, 10);
+        
+      });
+    </script>
+  </body>
+</html>
